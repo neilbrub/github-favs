@@ -1,18 +1,60 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+
+import SearchView from './Views/Search';
+import FavouritesView from './Views/Favourites';
+
 import './App.css';
 
 class App extends Component {
+  state = {
+    favourites: []
+  }
+
+  addFavourites = records => {
+    this.setState({
+      favourites: this.state.favourites.concat(records)
+    });
+  }
+
+  removeFavourites = recordsToRemove => {
+    if (!recordsToRemove.length) return;
+    /**
+     * TODO: Store favourites in map for quicker deletion
+     */
+    const { favourites } = this.state;
+    var favouritesToKeep = [];
+    favourites.forEach(favourite => {
+      // Is this favourite in recordsToRemove?
+      if (!recordsToRemove.find(record => favourite.id === record.id)) {
+        favouritesToKeep.push(favourite);
+      }
+    });
+    this.setState({
+      favourites: favouritesToKeep
+    });
+  }
+
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          <h1>My Github Favourites</h1>
         </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        
+        <div className="App-body">
+          <div className="Search-container">
+            <SearchView
+              favourites={this.state.favourites}
+              addFavourites={this.addFavourites}
+            />
+          </div>
+          <div className="Favourites-container">
+            <FavouritesView
+              favourites={this.state.favourites}
+              removeFavourites={this.removeFavourites}
+            />
+          </div>
+        </div>
       </div>
     );
   }
