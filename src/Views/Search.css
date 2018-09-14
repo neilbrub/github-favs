@@ -43,3 +43,26 @@
   color: rgba(255, 255, 255, 0.9);
   box-shadow: 1px 2px 10px #888888;
 }
+
+.results-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 20px 40px 20px 40px;
+}
+
+.action-text {
+  color: blue;
+  text-decoration: underline;
+  text-align: right;
+  cursor: pointer;
+}
+
+.action-text:active {
+  color: purple;
+}
+
+.action-text-selected {
+  text-align: right;
+}

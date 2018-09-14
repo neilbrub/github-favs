@@ -1,0 +1,15 @@
+.table {
+  width: 100%;
+}
+
+.header-row {
+  padding-bottom: 20px;
+}
+
+.header-cell {
+  text-align: left;
+}
+
+.content-cell {
+  text-align: left;
+}

@@ -1,0 +1,16 @@
+.favourites-container {
+  display: flex;
+  justify-content: center;
+  margin: 40px 20px 40px 20px;
+}
+
+.action-text {
+  color: blue;
+  text-decoration: underline;
+  text-align: right;
+  cursor: pointer;
+}
+
+.action-text:active{
+  color: purple;
+}

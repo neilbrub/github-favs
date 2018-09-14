@@ -7,51 +7,44 @@ import './App.css';
 
 class App extends Component {
   state = {
-    favourites: []
+    favourites: new Map()
   }
 
-  addFavourites = records => {
+  addFavourite = record => {
+    let { favourites } = this.state;
+    if (favourites.has(record.id)) return;
+
     this.setState({
-      favourites: this.state.favourites.concat(records)
+      favourites: favourites.set(record.id, record)
     });
   }
 
-  removeFavourites = recordsToRemove => {
-    if (!recordsToRemove.length) return;
-    /**
-     * TODO: Store favourites in map for quicker deletion
-     */
-    const { favourites } = this.state;
-    var favouritesToKeep = [];
-    favourites.forEach(favourite => {
-      // Is this favourite in recordsToRemove?
-      if (!recordsToRemove.find(record => favourite.id === record.id)) {
-        favouritesToKeep.push(favourite);
-      }
-    });
-    this.setState({
-      favourites: favouritesToKeep
-    });
+  removeFavourite = recordToRemove => {
+    let { favourites } = this.state;
+    favourites.delete(recordToRemove.id);
+    this.setState({ favourites });
   }
 
   render() {
+    console.log("Favourites: ", this.state.favourites);
+
     return (
       <div className="App">
         <header className="App-header">
           <h1>My Github Favourites</h1>
         </header>
-        
+
         <div className="App-body">
           <div className="Search-container">
             <SearchView
               favourites={this.state.favourites}
-              addFavourites={this.addFavourites}
+              addFavourite={this.addFavourite}
             />
           </div>
           <div className="Favourites-container">
             <FavouritesView
               favourites={this.state.favourites}
-              removeFavourites={this.removeFavourites}
+              removeFavourite={this.removeFavourite}
             />
           </div>
         </div>
