@@ -12,7 +12,7 @@ export default class Search extends Component {
   executeQuery = async () => {
     const { searchTerm } = this.state;
 
-    let { repoAuthor, repoName } = this.parseInput(searchTerm);
+    let { repoAuthor } = this.parseInput(searchTerm);
 
     /**
      * Query for organization and user; prioritize organization
@@ -32,6 +32,14 @@ export default class Search extends Component {
                 primaryLanguage{
                   name
                 }
+                releases(last: 10){
+                  edges{
+                    node{
+                      name
+                      createdAt
+                    }
+                  }
+                }
               }
             }
           }
@@ -40,6 +48,7 @@ export default class Search extends Component {
           repositories(first: 10){
             edges{
               node{
+                id
                 name
                 owner{
                   login
@@ -47,6 +56,14 @@ export default class Search extends Component {
                 url
                 primaryLanguage{
                   name
+                }
+                releases(last: 10){
+                  edges{
+                    node{
+                      name
+                      createdAt
+                    }
+                  }
                 }
               }
             }
@@ -66,21 +83,44 @@ export default class Search extends Component {
 
     let responseData = response.data.data;
 
-    if (!responseData) {
-      this.setState({ results: [] });
-    } else {
-      let results;
-      if (responseData.organization) {
-        results = _.get(responseData, ['organization', 'repositories', 'edges']);
-      } else if (responseData.user) {
-        results = _.get(responseData, ['user', 'repositories', 'edges']);
-      }
-      let nodes = results.map(repo => repo.node);
-
-      this.setState({
-        results: nodes
-      });
+    let results = [];
+    if (responseData && responseData.organization) {
+      results = _.get(responseData, ['organization', 'repositories', 'edges']);
+    } else if (responseData && responseData.user) {
+      results = _.get(responseData, ['user', 'repositories', 'edges']);
     }
+
+    let nodes = results.map(repo => {
+
+      var releases = _.get(repo, ['node', 'releases', 'edges']);
+      var latestTag = '-';
+
+      /**
+       * Get latest tag
+       */
+      if (releases.length) {
+
+        // Sort oldest to newest
+        var sortedReleases = _.sortBy(releases, edge => {
+          return new Date(edge.node.createdAt).valueOf();
+        });
+
+        // Pick last tag in the list with a name (this will be latest tag)
+        sortedReleases.forEach(edge => {
+          var name = edge.node.name;
+          if (name) latestTag = name;
+        });
+      }
+
+      return {
+        ...repo.node,
+        tag: latestTag
+      }
+    });
+
+    this.setState({
+      results: nodes
+    });
   }
 
   /**
@@ -145,7 +185,7 @@ export default class Search extends Component {
         [
           (<a href={result.url} target="_blank"><div>{`${result.owner.login}/${result.name}`}</div></a>),
           (<div>{_.get(result, ['primaryLanguage', 'name'], '-')}</div>),
-          (<div>-</div>),
+          (<div>{result.tag}</div>),
           actionJSX
         ]
       )
