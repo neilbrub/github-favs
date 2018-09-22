@@ -32,14 +32,6 @@ export default class Search extends Component {
                 primaryLanguage{
                   name
                 }
-                releases(last: 10){
-                  edges{
-                    node{
-                      name
-                      createdAt
-                    }
-                  }
-                }
               }
             }
           }
@@ -56,14 +48,6 @@ export default class Search extends Component {
                 url
                 primaryLanguage{
                   name
-                }
-                releases(last: 10){
-                  edges{
-                    node{
-                      name
-                      createdAt
-                    }
-                  }
                 }
               }
             }
@@ -90,33 +74,33 @@ export default class Search extends Component {
       results = _.get(responseData, ['user', 'repositories', 'edges']);
     }
 
-    let nodes = results.map(repo => {
+    let nodePromises = results.map(repo => {
 
-      var releases = _.get(repo, ['node', 'releases', 'edges']);
-      var latestTag = '-';
+      return new Promise(async (resolve, reject) => {
 
-      /**
-       * Get latest tag
-       */
-      if (releases.length) {
+        var latestTag = '-';
 
-        // Sort oldest to newest
-        var sortedReleases = _.sortBy(releases, edge => {
-          return new Date(edge.node.createdAt).valueOf();
+        /**
+         * GraphQL's RepositoryInfo object does not seem to support tags, so we'll use REST
+         */
+        try {
+          let tagResults = await axios.get(`https://api.github.com/repos/${repoAuthor}/${repo.node.name}/tags`,
+            {
+              headers: {
+                'Authorization': `bearer 9bfcabc74839305e7ccd55cb9bef3b2bf740573a`
+              }
+            });
+          latestTag = _.get(_.first(tagResults.data), 'name', '-');
+        } catch (err) { console.error(err) }
+
+        resolve({
+          ...repo.node,
+          tag: latestTag
         });
-
-        // Pick last tag in the list with a name (this will be latest tag)
-        sortedReleases.forEach(edge => {
-          var name = edge.node.name;
-          if (name) latestTag = name;
-        });
-      }
-
-      return {
-        ...repo.node,
-        tag: latestTag
-      }
+      });
     });
+
+    let nodes = await Promise.all(nodePromises);
 
     this.setState({
       results: nodes
