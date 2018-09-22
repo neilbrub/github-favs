@@ -21,4 +21,5 @@
 .Favourites-container {
   flex: 1;
   background-color: rgb(235, 235, 235);
+  overflow: auto;
 }

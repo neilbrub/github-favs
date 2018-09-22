@@ -23,7 +23,7 @@ export default class Favourites extends Component {
         [
           (<a href={repo.url} target="_blank"><div>{`${repo.owner.login}/${repo.name}`}</div></a>),
           (<div>{_.get(repo, ['primaryLanguage', 'name'], '-')}</div>),
-          (<div>-</div>),
+          (<div>{repo.tag}</div>),
           (<div className="action-text" onClick={() => { removeFavourite(repo) }}>Remove</div>)
         ]
       )

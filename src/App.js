@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Cookies from 'js-cookie';
 
 import SearchView from './Views/Search';
 import FavouritesView from './Views/Favourites';
@@ -7,27 +8,44 @@ import './App.css';
 
 class App extends Component {
   state = {
-    favourites: new Map()
+    favourites: this.loadFavourites()
   }
 
-  addFavourite = record => {
+  /**
+   * Load in favourites saved in browser cookie
+   */
+  loadFavourites() {
+    let saved = Cookies.getJSON('favourites');
+    
+    // convert parsed cookie to map
+    if (saved) saved = new Map(saved);
+    else saved = new Map();
+    
+    return saved;
+  }
+
+  addFavourite = recordToAdd => {
     let { favourites } = this.state;
-    if (favourites.has(record.id)) return;
+    if (favourites.has(recordToAdd.id)) return;
+
+    let updatedFavs = favourites.set(recordToAdd.id, recordToAdd);
 
     this.setState({
-      favourites: favourites.set(record.id, record)
+      favourites: updatedFavs
     });
+
+    Cookies.set('favourites', JSON.stringify([...updatedFavs]));
   }
 
   removeFavourite = recordToRemove => {
     let { favourites } = this.state;
     favourites.delete(recordToRemove.id);
     this.setState({ favourites });
+
+    Cookies.set('favourites', JSON.stringify([...favourites]));
   }
 
   render() {
-    console.log("Favourites: ", this.state.favourites);
-
     return (
       <div className="App">
         <header className="App-header">
