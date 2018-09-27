@@ -11,6 +11,7 @@ export default class Search extends Component {
 
   executeQuery = async () => {
     const { searchTerm } = this.state;
+    if (!searchTerm) return;
 
     let { repoAuthor } = this.parseInput(searchTerm);
 
